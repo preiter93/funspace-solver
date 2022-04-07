@@ -1,0 +1,33 @@
+[package]
+name = "funspace-solver"
+version = "0.3.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ndarray = "0.15"
+funspace = { path = "../funspace", version = "0.4" }
+num-traits = "0.2"
+num-complex = "0.4"
+
+[dev-dependencies]
+ndarray-linalg = { version = "0.14", features = ["openblas-static"] }
+rand = "0.8"
+criterion = { version = "0.3", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmark_tri"
+harness = false
+
+[[bench]]
+name = "benchmark_tetra"
+harness = false
+
+[[bench]]
+name = "benchmark_penta"
+harness = false
+
+[[bench]]
+name = "benchmark_hepta"
+harness = false
