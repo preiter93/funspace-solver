@@ -1,6 +1,6 @@
 //! Hepta-diagonal matrix solver
 //!     Ax = b
-//! where A is banded with diagonals in offsets -2, 1, 0, 1, 2, 3, 4
+//! where A is banded with diagonals in offsets -2, -1, 0, 1, 2, 3, 4
 #![allow(clippy::many_single_char_names)]
 use num_traits::Zero;
 use std::clone::Clone;
@@ -61,7 +61,7 @@ impl<T> Hepta2101234<T> {
     ///
     /// # Panics
     /// - Matrix is non-square
-    /// - Matrix is non-zero on some diagonal other than -2, 1, 0, 1, 2, 3, 4
+    /// - Matrix is non-zero on some diagonal other than -2, -1, 0, 1, 2, 3, 4
     #[must_use]
     pub fn from_array2(array: &ndarray::Array2<T>) -> Self
     where
@@ -306,12 +306,9 @@ impl<T> Hepta2101234<T> {
         // Forward step
         x[0] = b[0] / mu[0];
         x[1] = (b[1] - x[0] * ka[1]) / mu[1];
-        for i in 2..n - 3 {
+        for i in 2..n {
             x[i] = (b[i] - x[i - 2] * l2[i - 2] - x[i - 1] * ka[i]) / mu[i];
         }
-        x[n - 3] = (b[n - 3] - x[n - 5] * l2[n - 5] - x[n - 4] * ka[n - 3]) / mu[n - 3];
-        x[n - 2] = (b[n - 2] - x[n - 4] * l2[n - 4] - x[n - 3] * ka[n - 2]) / mu[n - 2];
-        x[n - 1] = (b[n - 1] - x[n - 3] * l2[n - 3] - x[n - 2] * ka[n - 1]) / mu[n - 1];
 
         // Backward substitution
         x[n - 2] = x[n - 2] - x[n - 1] * al[n - 2];
@@ -459,24 +456,12 @@ impl<T> Hepta2101234<T> {
             *x.get_unchecked_mut(1) = (*b.get_unchecked(1)
                 - *x.get_unchecked(0) * *ka.get_unchecked(1))
                 / *mu.get_unchecked(1);
-            for i in 2..n - 3 {
+            for i in 2..n {
                 *x.get_unchecked_mut(i) = (*b.get_unchecked(i)
                     - *x.get_unchecked(i - 2) * *l2.get_unchecked(i - 2)
                     - *x.get_unchecked(i - 1) * *ka.get_unchecked(i))
                     / *mu.get_unchecked(i);
             }
-            *x.get_unchecked_mut(n - 3) = (*b.get_unchecked(n - 3)
-                - *x.get_unchecked(n - 5) * *l2.get_unchecked(n - 5)
-                - *x.get_unchecked(n - 4) * *ka.get_unchecked(n - 3))
-                / *mu.get_unchecked(n - 3);
-            *x.get_unchecked_mut(n - 2) = (*b.get_unchecked(n - 2)
-                - *x.get_unchecked(n - 4) * *l2.get_unchecked(n - 4)
-                - *x.get_unchecked(n - 3) * *ka.get_unchecked(n - 2))
-                / *mu.get_unchecked(n - 2);
-            *x.get_unchecked_mut(n - 1) = (*b.get_unchecked(n - 1)
-                - *x.get_unchecked(n - 3) * *l2.get_unchecked(n - 3)
-                - *x.get_unchecked(n - 2) * *ka.get_unchecked(n - 1))
-                / *mu.get_unchecked(n - 1);
 
             // Backward substitution
             *x.get_unchecked_mut(n - 2) =
