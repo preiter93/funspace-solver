@@ -1,5 +1,5 @@
 //! # One-dimensional Helmholtz equation in Chebyshev space
-//! BC: u(-1) = u'(-1) = u(1) = u'(1) = 0
+//! BC: u(-1) = u''(-1) = u(1) = u''(1) = 0
 //!
 //! $$$
 //! (c - \nabla^4) x = b
