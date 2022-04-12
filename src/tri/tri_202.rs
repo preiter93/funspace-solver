@@ -233,6 +233,51 @@ impl<T> Tri202<T> {
     }
 }
 
+/// Elementwise multiplication with scalar
+impl<'a, T> std::ops::Mul<T> for &'a Tri202<T>
+where
+    T: std::ops::MulAssign + Copy,
+{
+    type Output = Tri202<T>;
+
+    fn mul(self, other: T) -> Self::Output {
+        let mut new = self.clone();
+        for x in &mut new.l2 {
+            *x *= other;
+        }
+        for x in &mut new.d0 {
+            *x *= other;
+        }
+        for x in &mut new.u2 {
+            *x *= other;
+        }
+        new
+    }
+}
+
+/// Addition : &Self + &Self
+impl<'a, 'b, T> Add<&'b Tri202<T>> for &'a Tri202<T>
+where
+    T: std::ops::AddAssign + Copy,
+{
+    type Output = Tri202<T>;
+
+    fn add(self, other: &'b Tri202<T>) -> Self::Output {
+        assert!(self.d0.len() == other.d0.len(), "Size mismatch");
+        let mut new = self.clone();
+        for (x, y) in new.l2.iter_mut().zip(other.l2.iter()) {
+            *x += *y;
+        }
+        for (x, y) in new.d0.iter_mut().zip(other.d0.iter()) {
+            *x += *y;
+        }
+        for (x, y) in new.u2.iter_mut().zip(other.u2.iter()) {
+            *x += *y;
+        }
+        new
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

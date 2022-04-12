@@ -446,6 +446,62 @@ impl<T> Penta42024<T> {
     }
 }
 
+/// Elementwise multiplication with scalar
+impl<'a, T> std::ops::Mul<T> for &'a Penta42024<T>
+where
+    T: std::ops::MulAssign + Copy,
+{
+    type Output = Penta42024<T>;
+
+    fn mul(self, other: T) -> Self::Output {
+        let mut new = self.clone();
+        for x in &mut new.l4 {
+            *x *= other;
+        }
+        for x in &mut new.l2 {
+            *x *= other;
+        }
+        for x in &mut new.d0 {
+            *x *= other;
+        }
+        for x in &mut new.u2 {
+            *x *= other;
+        }
+        for x in &mut new.u4 {
+            *x *= other;
+        }
+        new
+    }
+}
+
+/// Addition : &Self + &Self
+impl<'a, 'b, T> Add<&'b Penta42024<T>> for &'a Penta42024<T>
+where
+    T: std::ops::AddAssign + Copy,
+{
+    type Output = Penta42024<T>;
+
+    fn add(self, other: &'b Penta42024<T>) -> Self::Output {
+        assert!(self.d0.len() == other.d0.len(), "Size mismatch");
+        let mut new = self.clone();
+        for (x, y) in new.l4.iter_mut().zip(other.l4.iter()) {
+            *x += *y;
+        }
+        for (x, y) in new.l2.iter_mut().zip(other.l2.iter()) {
+            *x += *y;
+        }
+        for (x, y) in new.d0.iter_mut().zip(other.d0.iter()) {
+            *x += *y;
+        }
+        for (x, y) in new.u2.iter_mut().zip(other.u2.iter()) {
+            *x += *y;
+        }
+        for (x, y) in new.u4.iter_mut().zip(other.u4.iter()) {
+            *x += *y;
+        }
+        new
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;

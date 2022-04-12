@@ -1,0 +1,72 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
+\begin{document}
+We want to solve the two-dimensional Poisson equation numerically:
+\begin{equation}
+(\partial_{xx} + \partial_{yy}) u = f,
+\end{equation}
+where $u$ and $f$ are spectral coefficients. 
+Multivariate problems can be described well with Kronecker notation, i.e.
+\begin{equation}
+(D_2 \otimes I + I \otimes D_2) u = f,
+\end{equation}
+where $D_2$ is the discrete differentiation operator, $I$ the identity matrix and $u$ and $f$ are the flattened one-dimensional vectors.
+We impose boundary conditions by using basis recombinations $u=(S\otimes S)v$, where $v$ are spectral coefficients in a function base that already satisfies the boundary conditions. Here we will impose Dirichlet BCs on all sides. In this case $u\in\mathbb{R}^{N\times N}$, $v\in\mathbb{R}^{N-2\times N-2}$ and $S\in\mathbb{R}^{N\times N-2}$. We get
+\begin{equation}
+(D_2 S \otimes S + S \otimes D_2 S) v = f.
+\label{eq:3}
+\end{equation}
+Our intent is to decouble the $x$ and $y$ dimension, which allows the use of efficient solvers. First, we multiply \eqref{eq:3} with $S^{-1}$ from the left
+\begin{equation}
+(S^{-1} D_2 S \otimes S + I \otimes D_2 S) v = (S^{-1}  \otimes I)f.
+\label{eq:4}
+\end{equation}
+Applying the eigendecomposition $S^{-1} D_2 S = Q \Lambda Q^{-1}$
+\begin{equation}
+(Q \Lambda Q^{-1} \otimes S +  I \otimes D_2 S) v = (S^{-1}  \otimes I)f.
+\label{eq:5}
+\end{equation}
+and multiplying with $Q^{-1}$ from the left
+\begin{equation}
+(\Lambda Q^{-1} \otimes S +  Q^{-1} \otimes D_2 S) v = (Q^{-1} S^{-1}´  \otimes I)f
+\label{eq:6}
+\end{equation}
+or simplified
+\begin{equation}
+(\Lambda \otimes S +   I \otimes D_2 S) \widehat{v} = \widehat{f}
+\label{eq:7}
+\end{equation}
+with $(Q^{-1} \otimes I) v = \widehat{v}$ and $(Q^{-1} S^{-1}  \otimes I)f = \widehat{f}$. Since $I$ and $\Lambda$ are both diagonal matrices, eq. \eqref{eq:7} decoubles in $x$ and $y$, such that we get a couple of one-dimensional equations
+\begin{equation}
+(\lambda_i S + D_2 S) \widehat{v}_i = \widehat{f}_i,
+\label{eq:8}
+\end{equation}
+where $i$ runs from $0$ to $N-3$.\\
+
+\textbf{In short:}\\
+
+\textit{Preprocessing}
+\begin{itemize}
+\item Eigendecomposition $S^{-1} D_2 S = Q \Lambda Q^{-1}$
+\end{itemize}
+
+\textit{Main}
+\begin{itemize}
+\item (i) Transform $\widehat{f} = (Q^{-1} S^{-1} \otimes I)f$
+\item (ii) Solve $(\lambda_i  S +  D_2 S) \widehat{v}_i = \widehat{f}_i$, where $i=0,..,N-3$.
+\item (iii) Transform $v = (Q \otimes I) \widehat{v}$.
+\end{itemize}
+
+\textbf{Notes:}\\
+
+Step (ii) can be preconditioned with $D_2^{-1}$, i.e.
+\begin{itemize}
+\item (ii) Solve $(\lambda_i  D_2^{-1}S +  S) \widehat{v}_i = D_2^{-1}\widehat{f}_i$
+\end{itemize}
+
+which is banded, instead of upper triangular.
+\end{document}
