@@ -3,13 +3,17 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{pgfplots}
 \usepackage[left=1.5cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
 \begin{document}
+\section*{Poisson equation in 2D}
 We want to solve the two-dimensional Poisson equation numerically:
 \begin{equation}
 (\partial_{xx} + \partial_{yy}) u = f,
 \end{equation}
 where $u$ and $f$ are spectral coefficients. 
+
+\subsection*{Implementation}
 Multivariate problems can be described well with Kronecker notation, i.e.
 \begin{equation}
 (D_2 \otimes I + I \otimes D_2) u = f,
@@ -69,4 +73,18 @@ Step (ii) can be preconditioned with $D_2^{-1}$, i.e.
 \end{itemize}
 
 which is banded, instead of upper triangular.
+
+\subsection*{Example}
+See \textit{examples/poisson2d\_cheb\_dirichlet.rs}.
+
+%\subsection*{Convergence}
+%\begin{tikzpicture}
+%    \begin{semilogyaxis}[
+%    xlabel=$N$,
+%    ylabel=$\left\lVert v-v_t\right\rVert/\left\lVert v_t\right\rVert$,
+%    ]
+%        %\addplot[mark=o, mark size=2pt, black, thick] coordinates {(8,2.07199e-7) (16,2.03066e-17) (32,2.71877e-13) (64,4.34132e-7) (128,1.23877e-1)};
+%
+%    \end{semilogyaxis}
+%\end{tikzpicture}
 \end{document}

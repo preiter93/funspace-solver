@@ -1,3 +1,4 @@
 /target
 Cargo.lock
 /src/main.rs
+/examples/poisson2d_cheb_dirichlet2.rs

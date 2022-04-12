@@ -1,0 +1,106 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[left=1.5cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
+\begin{document}
+\section*{Helmholtz equation in 2D using ADI}
+We want to solve the two-dimensional Helmholtz equation numerically:
+\begin{equation}
+(1  - c \partial_{xx} - c \partial_{yy}) u = f,
+\end{equation}
+where $u$ and $f$ are spectral coefficients and $c$ is a scalar constant. 
+
+\subsection*{ADI}
+Our intent is to decouble the $x$ and $y$ dimension, which allows the use of efficient solvers. This can be achieved by the eigendecomposition method as descibred in \textit{doc\_poisson2d}. However, here we use the alternating direction implicit (ADI) method, whose accuracy depends on the size of the parameter $k$. The idea of the ADI method is to approximate the multidimensional Helmholtz operator by aproduct of one-dimensional operators, i.e. 
+
+\begin{equation}
+    \left(\mathbf{I} - c\nabla^2\right) \approx \left( \mathbf{I} - c\nabla^2_{x} \right) \left( \mathbf{I} - c\nabla^2_{y} \right)
+    \label{eq:2}
+\end{equation}
+which can be solved successively along $x$ and $y$, i.e.
+\begin{align}
+     \left( \mathbf{I} - c\nabla^2_{x} \right) g &= f, \notag\\
+     \left( \mathbf{I} - c\nabla^2_{y} \right) u &= g
+     \label{eq:3}
+\end{align}
+
+\subsection*{Implementation}
+
+Multivariate problems can be described well with Kronecker notation, i.e.
+\begin{equation}
+\left[I \otimes I - c \left(D_2 \otimes I - I \otimes D_2\right)\right] u = f,
+\end{equation}
+where $D_2$ is the discrete differentiation operator, $I$ the identity matrix and $u$ and $f$ are the flattened one-dimensional vectors.
+We impose boundary conditions by using basis recombinations $u=(S\otimes S)v$, where $v$ are spectral coefficients in a function base that already satisfies the boundary conditions. Here we will impose Dirichlet BCs on all sides. In this case $u\in\mathbb{R}^{N\times N}$, $v\in\mathbb{R}^{N-2\times N-2}$ and $S\in\mathbb{R}^{N\times N-2}$. We get
+\begin{equation}
+\left[S \otimes S - c \left(D_2 S \otimes S - S \otimes D_2 S\right)\right] u = f.
+\label{eq:5}
+\end{equation}
+Using the ADI approximation eq. \eqref{eq:2} or eq. \eqref{eq:3}, we get a set of one dimensional helmholtz equations
+\begin{align}
+     \left( S - c D_2 S \right) g_i &= f_i, \notag\\
+     \left( S - c D_2 S \right) v_i &= g_i.
+     \label{eq:6}
+\end{align}
+Those can be solved more efficiently by preconditioning with the inverse of the $D_2$ operator, i.e. $D_2^{-1}$, thus we get
+\begin{align}
+     \left( D_2^{-1}S - c S \right) g_i &= D_2^{-1}f_i, \notag\\
+     \left( D_2^{-1}S - c S \right) v_i &= D_2^{-1}g_i.
+     \label{eq:6}
+\end{align}
+where the lhs ($D_2^{-1}S - c S$) and rhs ($D_2^{-1}$) operators are banded with diagonals on $-2, 0, 2, 4$, respectively $-2, 0, 2$.
+
+\subsection*{Example}
+See \textit{examples/hholtz2d\_cheb\_dirichlet.rs}.
+%First, we multiply \eqref{eq:3} with $S^{-1}$ from the left
+%\begin{equation}
+%(S^{-1} D_2 S \otimes S + I \otimes D_2 S) v = (S^{-1}  \otimes I)f.
+%\label{eq:4}
+%\end{equation}
+%Applying the eigendecomposition $S^{-1} D_2 S = Q \Lambda Q^{-1}$
+%\begin{equation}
+%(Q \Lambda Q^{-1} \otimes S +  I \otimes D_2 S) v = (S^{-1}  \otimes I)f.
+%\label{eq:5}
+%\end{equation}
+%and multiplying with $Q^{-1}$ from the left
+%\begin{equation}
+%(\Lambda Q^{-1} \otimes S +  Q^{-1} \otimes D_2 S) v = (Q^{-1} S^{-1}´  \otimes I)f
+%\label{eq:6}
+%\end{equation}
+%or simplified
+%\begin{equation}
+%(\Lambda \otimes S +   I \otimes D_2 S) \widehat{v} = \widehat{f}
+%\label{eq:7}
+%\end{equation}
+%with $(Q^{-1} \otimes I) v = \widehat{v}$ and $(Q^{-1} S^{-1}  \otimes I)f = \widehat{f}$. Since $I$ and $\Lambda$ are both diagonal matrices, eq. \eqref{eq:7} decoubles in $x$ and $y$, such that we get a couple of one-dimensional equations
+%\begin{equation}
+%(\lambda_i S + D_2 S) \widehat{v}_i = \widehat{f}_i,
+%\label{eq:8}
+%\end{equation}
+%where $i$ runs from $0$ to $N-3$.\\
+%
+%\textbf{In short:}\\
+%
+%\textit{Preprocessing}
+%\begin{itemize}
+%\item Eigendecomposition $S^{-1} D_2 S = Q \Lambda Q^{-1}$
+%\end{itemize}
+%
+%\textit{Main}
+%\begin{itemize}
+%\item (i) Transform $\widehat{f} = (Q^{-1} S^{-1} \otimes I)f$
+%\item (ii) Solve $(\lambda_i  S +  D_2 S) \widehat{v}_i = \widehat{f}_i$, where $i=0,..,N-3$.
+%\item (iii) Transform $v = (Q \otimes I) \widehat{v}$.
+%\end{itemize}
+%
+%\textbf{Notes:}\\
+%
+%Step (ii) can be preconditioned with $D_2^{-1}$, i.e.
+%\begin{itemize}
+%\item (ii) Solve $(\lambda_i  D_2^{-1}S +  S) \widehat{v}_i = D_2^{-1}\widehat{f}_i$
+%\end{itemize}
+%
+%which is banded, instead of upper triangular.
+\end{document}
