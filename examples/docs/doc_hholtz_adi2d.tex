@@ -13,10 +13,10 @@ We want to solve the two-dimensional Helmholtz equation numerically:
 where $u$ and $f$ are spectral coefficients and $c$ is a scalar constant. 
 
 \subsection*{ADI}
-Our intent is to decouble the $x$ and $y$ dimension, which allows the use of efficient solvers. This can be achieved by the eigendecomposition method as descibred in \textit{doc\_poisson2d}. However, here we use the alternating direction implicit (ADI) method, whose accuracy depends on the size of the parameter $k$. The idea of the ADI method is to approximate the multidimensional Helmholtz operator by aproduct of one-dimensional operators, i.e. 
+Our intent is to decouble the $x$ and $y$ dimension, which allows the use of efficient solvers. This can be achieved by the eigendecomposition method as descibred in \textit{doc\_poisson2d}. However, here we use the alternating direction implicit (ADI) method, whose accuracy depends on the size of the parameter $c$ ($c$ smaller $\rightarrow$ more accurate). The idea of the ADI method is to approximate the multidimensional Helmholtz operator by a product of one-dimensional operators, i.e. 
 
 \begin{equation}
-    \left(\mathbf{I} - c\nabla^2\right) \approx \left( \mathbf{I} - c\nabla^2_{x} \right) \left( \mathbf{I} - c\nabla^2_{y} \right)
+    \left(I - c\nabla^2\right) = \left( I - c\nabla^2_{x} \right) \left( I - c\nabla^2_{y} \right) + c^2\nabla^2_x \nabla^2_y \stackrel{c \text{ small}}{\approx} \left( I - c\nabla^2_{x} \right) \left( I - c\nabla^2_{y} \right)
     \label{eq:2}
 \end{equation}
 which can be solved successively along $x$ and $y$, i.e.
